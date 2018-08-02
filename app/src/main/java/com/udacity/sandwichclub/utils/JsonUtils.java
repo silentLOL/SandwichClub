@@ -15,6 +15,7 @@ import java.util.List;
 public class JsonUtils {
 
     private static final String TAG = JsonUtils.class.getName();
+
     public static final String NAME = "name";
     public static final String MAIN_NAME = "mainName";
     public static final String ALSO_KNOWN_AS = "alsoKnownAs";
