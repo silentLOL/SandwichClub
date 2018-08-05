@@ -7,9 +7,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.udacity.sandwichclub.model.Sandwich;
 import com.udacity.sandwichclub.utils.JsonUtils;
@@ -31,6 +33,8 @@ public class DetailActivity extends AppCompatActivity {
     private TextView labelIngredients_tv;
     private TextView labelDescription_tv;
     private TextView labelOrigin_tv;
+    private TextView errorMessage_tv;
+    private ProgressBar progressBar_pb;
 
 
     @Override
@@ -51,6 +55,10 @@ public class DetailActivity extends AppCompatActivity {
         labelIngredients_tv = findViewById(R.id.label_ingredients_tv);
         labelDescription_tv = findViewById(R.id.lable_description_tv);
         labelOrigin_tv = findViewById(R.id.label_origin_tv);
+
+        // progress and error
+        errorMessage_tv = findViewById(R.id.tv_error_message);
+        progressBar_pb = findViewById(R.id.pb_loading_progress);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -77,7 +85,25 @@ public class DetailActivity extends AppCompatActivity {
         populateUI(sandwich);
         Picasso.with(this)
                 .load(sandwich.getImage())
-                .into(image_iv);
+                .into(image_iv, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar_pb.setVisibility(View.GONE);
+                        image_iv.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.e(TAG, "Error when downloading image!");
+                                errorMessage_tv.setVisibility(View.VISIBLE);
+                                progressBar_pb.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                });
 
         setTitle(sandwich.getMainName());
     }
@@ -95,8 +121,8 @@ public class DetailActivity extends AppCompatActivity {
             labelAlsoKnown_tv.setVisibility(View.VISIBLE);
             alsoKnown_tv.setText(printStringList(alsoKnownAs));
         } else {
-            alsoKnown_tv.setVisibility(View.INVISIBLE);
-            labelAlsoKnown_tv.setVisibility(View.INVISIBLE);
+            alsoKnown_tv.setVisibility(View.GONE);
+            labelAlsoKnown_tv.setVisibility(View.GONE);
         }
 
         List<String> ingredients = sandwich.getIngredients();
@@ -105,8 +131,8 @@ public class DetailActivity extends AppCompatActivity {
             labelIngredients_tv.setVisibility(View.VISIBLE);
             ingredients_tv.setText(printStringList(sandwich.getIngredients()));
         } else {
-            ingredients_tv.setVisibility(View.INVISIBLE);
-            labelIngredients_tv.setVisibility(View.INVISIBLE);
+            ingredients_tv.setVisibility(View.GONE);
+            labelIngredients_tv.setVisibility(View.GONE);
         }
 
         String description = sandwich.getDescription();
@@ -115,8 +141,8 @@ public class DetailActivity extends AppCompatActivity {
             labelDescription_tv.setVisibility(View.VISIBLE);
             description_tv.setText(description);
         } else {
-            description_tv.setVisibility(View.INVISIBLE);
-            labelDescription_tv.setVisibility(View.INVISIBLE);
+            description_tv.setVisibility(View.GONE);
+            labelDescription_tv.setVisibility(View.GONE);
         }
 
         String placeOfOrigin = sandwich.getPlaceOfOrigin();
@@ -125,8 +151,8 @@ public class DetailActivity extends AppCompatActivity {
             labelOrigin_tv.setVisibility(View.VISIBLE);
             origin_tv.setText(placeOfOrigin);
         } else {
-            origin_tv.setVisibility(View.INVISIBLE);
-            labelOrigin_tv.setVisibility(View.INVISIBLE);
+            origin_tv.setVisibility(View.GONE);
+            labelOrigin_tv.setVisibility(View.GONE);
         }
     }
 
@@ -142,4 +168,5 @@ public class DetailActivity extends AppCompatActivity {
         }
         return sb.toString();
     }
+
 }
